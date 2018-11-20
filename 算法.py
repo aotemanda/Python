@@ -1,4 +1,5 @@
-Python3:快速排序:分而治之+递归
+# 1、 Python3:快速排序:分而治之+递归
+		
 def quickSort(arr):
     if len(arr)<2:
     	return arr
