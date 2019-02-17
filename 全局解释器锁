@@ -1,0 +1,20 @@
+针对Cpython所拥有的GIL锁
+作用：由于Cpython解释器在运行python文件时，
+     Cpython进程与其运行文件所产生的主进程是一个进程（文件进程相当于Cpython的一个线程）
+     线程的特点是数据资源是共享的，而多个线程又都要共享Cpython的解释权限，共享意味着竞争，有竞争数据就不安全，
+     所以Cpython的GIL锁（Cpython的一个线程）
+     就产生了，根本作用是，当python文件中的线程想要执行其代码，必须获得GIL权限，否则不能执行，
+     所以cpu的多核优势也没有了，除非多开Cpython解释器或多进程，否则同时只能运行一个线程
+
+互斥锁作用：
+    互斥锁用于python文件运行进程（线程）时，使数据修改等操作的竞争变得有序化
+
+
+程序运行过程分析
+1、暂定开一个python进程，内有2个线程Thread-1,Thread-2，共享数据num
+2、Thread-1要运行其代码改num，GIL获得，Thread-1可以改，Thread-1获得Lock
+3、Thread-1代码在改num前先执行time.sleep（I/O啥的，就是没运行到改num）
+4、这时Thread-2要运行其代码去修改num，由于Thread-1是阻塞状态，Thread-2获得GIL
+5、由于Thread-1有Lock，所以Thread-2无法更改num
+6、这时Thread-1又抢到GIL，由于其保留Lock所以其可以继续运行代码使其修改num
+7、当Thread-1执行完释放lock后，Thread-2在获得GIL与Lock后才可对num进行修改
